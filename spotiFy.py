@@ -26,7 +26,6 @@ class DataNotFoundException(Exception):
 
 class TokenError(Exception):
     pass
-    pass
 
 
 def _getToken():
