@@ -14,7 +14,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 
-SPOTIFY_USERNAME = 'buttercrawl'    # 你的spotify账户名称
+SPOTIFY_USERNAME = 'buttercrawl'  # 你的spotify账户名称
 SPOTIFY_CLIENT_ID = '2fc4fc6df3f045ab9df8a7f63c6ccad3'  # 你在spotify developer创建的应用程序的用户id
 SPOTIFY_CLIENT_SECRET = '8e51a977a5e249ae9222f4e0419f52cc'  # 你在spotify developer创建的应用程序的用户密码
 SPOTIFY_REDIRECT_URI = 'http://localhost:8888/'  # 重定向网址，需要在应用程序设置里保持一致
@@ -97,7 +97,15 @@ class TrackInfo:
 
     def _getGenres(self, sp, id):
         resp = sp.artist(artist_id=id)
-        self.genres = resp['genres']
+        if len(resp['genres']) != 0:
+            self.genres = resp['genres'][0]
+            if len(self.genres) != 1:
+                for g in resp['genres'][1:]:
+                    self.genres += '/' + g
+
+            self.genres = self.genres.title()
+        else:
+            self.genres = 'Unclassified'
 
     def _getFeatures(self, sp, id):
         resp = sp.audio_features(tracks=id)
@@ -183,8 +191,16 @@ class AlbumInfo:
             raise DataNotFoundException(messages)
 
     def _getGenres(self, sp, id):
-        resp = sp.artist(id)
-        self.genres = resp['genres']
+        resp = sp.artist(artist_id=id)
+        if len(resp['genres']) != 0:
+            self.genres = resp['genres'][0]
+            if len(self.genres) != 1:
+                for g in resp['genres'][1:]:
+                    self.genres += '/' + g
+
+            self.genres = self.genres.title()
+        else:
+            self.genres = 'Unclassified'
 
     def _searchAlbum(self, sp, kw):
         q = kw.replace(' ', '%20')
@@ -239,10 +255,18 @@ class ArtistInfo:
 
         if resp is not None:
             self.name = resp['name']
-            self.genres = resp['genres']
             self.followers = resp['followers']['total']
             self.image = resp['images'][0]['url']
             self.popularity = resp['popularity']
+            if len(resp['genres']) != 0:
+                self.genres = resp['genres'][0]
+                if len(self.genres) != 1:
+                    for g in resp['genres'][1:]:
+                        self.genres += '/' + g
+
+                self.genres = self.genres.title()
+            else:
+                self.genres = 'Unclassified'
         else:
             messages = 'Can not found the artist (Perhaps the at_id is invalid )'
             raise DataNotFoundException(messages)
@@ -370,7 +394,7 @@ def _createPlaylist(name, description):
         raise CreateFailure(messages)
 
 
-def _updatePlaylist(pl_id, items):
+def _add_items_to_Playlist(pl_id, items):
     sp = _getToken(SPOTIFY_USERID, SPOTIFY_SCOPE1)
     try:
         sp.playlist_add_items(playlist_id=pl_id, items=items)
@@ -381,22 +405,21 @@ def _updatePlaylist(pl_id, items):
         print('Update finished')
 
 
-def _geturi():
+def _get_track_uri():
     sp = _getToken(SPOTIFY_USERNAME, SPOTIFY_SCOPE)
     wb = openpyxl.load_workbook('decade-charts.xlsx')
 
-    ws = wb['70s']
+    ws = wb['10s']
     for raw in range(2, 102):
         keyword = ws['B' + str(raw)].value.lower() + ' artist:' + ws['D' + str(raw)].value
-
         if keyword is not None:
             try:
                 uri = sp.search(keyword, type='track', limit=1)['tracks']['items'][0]['uri'].split(':')[2]
                 ws['K' + str(raw)].value = uri
             except:
                 continue
+
     wb.save('decade-charts.xlsx')
-    return "Finished"
 
 
 def _getitems(sheet):
@@ -408,19 +431,10 @@ def _getitems(sheet):
     return uris
 
 
-# ids = _getitems('70s')
-# plid = _createPlaylist(name='Billboard Greatest Of 60s', description='chart from billboard')
-# _updatePlaylist(pl_id=plid, items=ids)
-#
-
-
-# wb = openpyxl.load_workbook('decade-charts.xlsx')
-# sheets = ['60s', '70s']
-# for sheet in sheets:
-#     ws = wb[sheet]
-#     for raw in range(11, 102):
-#         sid = ws['K' + str(raw)].value
-#         genres = str(TrackInfo(track_id=sid).genres)
-#         ws['C' + str(raw)].value = genres
-#
-# wb.save('decade-charts.xlsx')
+def set_color(n):
+    colors = []
+    for i in range(n):
+        i = lambda: random.randint(0, 255)
+        color = '#%02X%02X%02X' % (i(), i(), i())
+        colors.append(color)
+    return colors
