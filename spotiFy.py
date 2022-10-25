@@ -14,12 +14,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 
-SPOTIFY_USERNAME = 'buttercrawl'  # 你的spotify账户名称
-SPOTIFY_CLIENT_ID = '2fc4fc6df3f045ab9df8a7f63c6ccad3'  # 你在spotify developer创建的应用程序的用户id
-SPOTIFY_CLIENT_SECRET = '8e51a977a5e249ae9222f4e0419f52cc'  # 你在spotify developer创建的应用程序的用户密码
+SPOTIFY_USERNAME = ''  # 你的spotify账户名称
+SPOTIFY_CLIENT_ID = ''  # 你在spotify developer创建的应用程序的用户id
+SPOTIFY_CLIENT_SECRET = ''  # 你在spotify developer创建的应用程序的用户密码
 SPOTIFY_REDIRECT_URI = 'http://localhost:8888/'  # 重定向网址，需要在应用程序设置里保持一致
 SPOTIFY_SCOPE = 'user-library-read'  # 声明的app授权权限
-SPOTIFY_USERID = '31fntoemcmefu5k6jns6kdayu5om'  # 创建歌单时你的spotify用户id而不是用户名
+SPOTIFY_USERID = ''  # 创建歌单时你的spotify用户id而不是用户名
 SPOTIFY_SCOPE1 = 'playlist-modify-public,playlist-modify-private'  # 创建歌单的权限
 
 
